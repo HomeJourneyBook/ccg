@@ -1,136 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home's Journey — CCG</title>
-<link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home's Journey — CCG</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div class="stars"></div>
 
-<!-- LANDING -->
+<!-- ═══════════════════════════════════════════════════════════
+     LANDING
+════════════════════════════════════════════════════════════ -->
 <div class="landing" id="landing">
   <div class="landing-title">HOME'S<br>JOURNEY</div>
   <div class="landing-sub">· · · CCG · · ·</div>
+
   <div class="start-group" id="startGroup">
     <button class="landing-btn" id="startMainBtn" onclick="expandStart()">Start Game</button>
     <div class="start-options hidden" id="startOptions">
       <button class="landing-btn" onclick="startGame()">Hot Seat</button>
-      <button class="landing-btn secondary" disabled style="opacity:0.3;cursor:not-allowed;">vs AI</button>
-      <button class="landing-btn secondary" disabled style="opacity:0.3;cursor:not-allowed;">Online</button>
+      <button class="landing-btn secondary" disabled>vs AI</button>
+      <button class="landing-btn secondary" disabled>Online</button>
     </div>
   </div>
+
   <button class="landing-btn secondary" onclick="showScreen('rules')">Rules</button>
   <button class="landing-btn secondary" onclick="showScreen('catalog')">Card Catalog</button>
   <button class="landing-btn secondary" onclick="showScreen('lore')">Lore</button>
 </div>
 
-<!-- RULES SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════
+     RULES SCREEN
+════════════════════════════════════════════════════════════ -->
 <div class="screen" id="rulesScreen">
   <div class="screen-header">
     <button class="screen-back" onclick="hideScreen('rules')">← Back</button>
     <div class="screen-title">Rules</div>
   </div>
   <div class="screen-body">
-
     <h2>The Idea</h2>
     <p>Two players. One device. Tea defends the Tavern, Jeet defends the Core — each with 20 HP. You build a field of Travelers and Legendaries, cast spells, activate artifacts and worlds. Bring your opponent's base to zero first.</p>
 
     <h2>What's On a Card</h2>
-    <p>Every card shows: its <strong>cost</strong> (top left corner — how much Essence to play it), its <strong>art</strong> in the center, its <strong>name</strong>, and for creatures — <strong>HP</strong> (heart) and <strong>ATK</strong> (sword) at the bottom. Below that is its <strong>ability text</strong> describing what it does.</p>
-    <p>Example: a Szarg costs 1 Essence, has 1 HP and 2 ATK, and the text reads <em>"Vanguard"</em> — meaning it can act the turn it arrives.</p>
+    <p>Every card shows: its <strong>cost</strong> (top left — Essence to play it), its <strong>art</strong>, its <strong>name</strong>, and for creatures — <strong>HP</strong> (heart) and <strong>ATK</strong> (sword) at the bottom. Below that is its <strong>ability text</strong>.</p>
+    <p>Example: a Szarg costs 1 Essence, has 1 HP and 2 ATK, and reads <em>"Vanguard"</em> — it can act the turn it arrives.</p>
 
     <h2>Essence</h2>
-    <p>Essence is your resource. You start with a maximum of 1 and gain +1 each turn — so by turn 5 you have 5 Essence to spend. It fully refills at the start of every turn. You can never gain more than your current maximum in a single turn (unless a card says otherwise).</p>
-    <p>Once per turn you may <strong>burn</strong> a card from your hand: it goes to the Void forever, but your Essence maximum permanently increases by 1. Useful when you have cards you don't need and want to reach expensive cards faster.</p>
+    <p>Essence is your resource. You start with a maximum of 1 and gain +1 each turn — so by turn 5 you have 5 to spend. It fully refills at the start of every turn.</p>
+    <p>Once per turn you may <strong>burn</strong> a card from your hand: it goes to the Void forever, but your Essence maximum permanently increases by 1.</p>
 
     <h2>A Turn, Step by Step</h2>
-    <p><strong>1.</strong> Your Essence refills. Worlds, Artifacts, and field effects trigger automatically (draws, heals, regen, etc.).</p>
-    <p><strong>2.</strong> You act freely — play cards, attack with creatures, use active abilities — in any order, as many times as you have Essence and available creatures.</p>
-    <p><strong>3.</strong> Press <strong>End Turn</strong> (or hit Space) when done. You draw 1 card (plus any extras from your effects), then your opponent takes over.</p>
+    <p><strong>1.</strong> Your Essence refills. Worlds, Artifacts, and field effects trigger automatically.</p>
+    <p><strong>2.</strong> Act freely — play cards, attack, use abilities — in any order.</p>
+    <p><strong>3.</strong> Press <strong>End Turn</strong> (or Space) when done. Draw 1 card, then your opponent takes over.</p>
 
     <h2>Creatures</h2>
-    <p>Travelers and Legendaries are creatures. When played, they enter the battlefield in a <em>sleeping</em> state (dashed border) and cannot act until your next turn. To attack with a creature: tap it to select it, then tap the enemy you want to hit.</p>
-    <p>When a creature attacks, the defender hits back simultaneously — unless it's <em>Feared</em> or <em>Invisible</em>. Creatures killed in battle go to the <strong>Graveyard</strong> (☠ counter) and may be revived. Burned cards go to the <strong>Void</strong> and are lost forever.</p>
+    <p>Travelers and Legendaries are creatures. When played, they enter <em>sleeping</em> (dashed border) and cannot act until your next turn. Tap to select, then tap the enemy to attack. The defender hits back simultaneously — unless Feared or Invisible.</p>
 
     <h2>Spells</h2>
-    <p>Spells take effect the moment they're played — draw cards, revive a fallen ally, add bonus Essence — then disappear into the Void. They leave no card on the battlefield.</p>
+    <p>Spells take effect immediately when played, then go to the Void.</p>
 
     <h2>Worlds</h2>
-    <p>A World is a permanent card that sits below your battlefield and passively affects the game as long as it's active. You can only have one World at a time. Playing a second World replaces the first — the old one goes to the Void. Worlds activate at the start of each turn.</p>
+    <p>A World sits below your battlefield and passively affects the game. Only one active at a time — playing a second replaces the first. Activates at the start of each turn.</p>
 
     <h2>Artifacts</h2>
-    <p>Artifacts also sit below the battlefield, but up to two can be active at once. Some trigger automatically each turn (draw, heal). Others are <em>active</em> — tap them to use their ability once per turn. Artifacts sleep their first turn, just like creatures.</p>
+    <p>Up to two Artifacts can be active at once. Some trigger automatically each turn; others are active — tap to use once per turn. Artifacts sleep their first turn.</p>
 
     <h2>Graveyard vs Void</h2>
-    <p>The <strong>Graveyard</strong> (☠) holds only creatures killed in battle. They can be revived by certain cards. The <strong>Void</strong> holds burned cards, played spells, and replaced worlds — nothing can retrieve them.</p>
+    <p>The <strong>Graveyard</strong> (☠) holds creatures killed in battle — they can be revived. The <strong>Void</strong> holds burned cards, spells, and replaced Worlds — nothing retrieves them.</p>
 
-    <hr style="border-color:#ffffff11;margin:24px 0;">
-    <h2>Glossary of Terms</h2>
-    <p style="color:#888;font-size:8px;margin-bottom:16px;">Terms appear on cards in plain language.</p>
+    <hr class="rule-divider">
+    <h2>Glossary</h2>
 
     <h3>Vanguard</h3>
-    <p>This creature can act — attack or use abilities — on the same turn it enters the field.</p>
+    <p>Can act on the same turn it enters the field.</p>
 
     <h3>Sleeping</h3>
-    <p>A creature that entered the field this turn and cannot act yet. Shown with a dashed border. It wakes up at the start of your next turn. Vanguard creatures skip the sleeping state entirely.</p>
+    <p>Entered the field this turn, cannot act yet. Wakes at the start of your next turn. Vanguard skips this state.</p>
 
     <h3>Provoke</h3>
-    <p>All enemy attacks must target this creature. A Feared Provoke creature still blocks — it cannot attack but enemies must still target it.</p>
+    <p>All enemy attacks must target this creature.</p>
+
+    <h3>Bushido</h3>
+    <p>ALL attacks — including Pierce — must target this creature. The strongest form of forced targeting.</p>
 
     <h3>Pierce</h3>
-    <p>This creature ignores Provoke and can attack the enemy base or any enemy directly. Pierce does not bypass Bushido.</p>
+    <p>Ignores Provoke. Can attack any enemy or the base directly. Does not bypass Bushido.</p>
 
     <h3>Fear</h3>
-    <p>When this creature attacks, the target is Feared: it skips its next turn and deals no counter-attack damage. A Feared creature cannot attack but Provoke still applies.</p>
+    <p>When this creature attacks, the target skips its next turn and deals no counter-attack. A Feared creature cannot attack but Provoke still applies.</p>
 
     <h3>Invisible</h3>
-    <p>This creature cannot be chosen as an attack target as long as other allies are on the field. When it becomes the last creature, it can be targeted normally. It also takes no counter-attack damage when attacked.</p>
+    <p>Cannot be targeted while allies are on the field. Deals no counter-attack when attacked.</p>
 
     <h3>Rage</h3>
-    <p>Each time this creature attacks, it permanently gains +1 ATK. The bonus resets if it dies and is revived.</p>
+    <p>Gains +1 ATK permanently each time it attacks. Resets on death.</p>
 
     <h3>Burn</h3>
-    <p>When this creature attacks, the target catches fire. Burning creatures lose 1 HP at the start of every turn. Fire is permanent until removed or death.</p>
+    <p>Target catches fire when attacked. Burning creatures lose 1 HP at turn start. Permanent until removed or death.</p>
 
     <h3>Regen</h3>
-    <p>This creature restores X HP to itself at the start of each turn, up to its maximum HP.</p>
+    <p>Restores X HP to itself at the start of each turn, up to its maximum.</p>
 
     <h3>Aura</h3>
-    <p>A passive field effect that benefits all allies while this card is on the field. The bonus disappears immediately when the aura card leaves the field. Multiple aura sources stack.</p>
+    <p>Passive bonus for all allies while this card is on the field. Lost immediately when the source leaves. Multiple auras stack.</p>
 
     <h3>Max HP</h3>
-    <p>Some abilities increase a creature's maximum HP. If the creature is at full health when this happens, its current HP also rises (3/3 becomes 4/4). If it's already wounded, only the maximum grows (2/3 becomes 2/4).</p>
+    <p>If at full health when maxHP increases, current HP rises too (3/3 → 4/4). If wounded, only max grows (2/3 → 2/4).</p>
 
     <h3>Squad</h3>
-    <p>When 3 or more Travelers of the same type of Gate are on your field simultaneously, they all receive a squad bonus. The bonus activates automatically and is lost the moment the squad drops below 3.</p>
+    <p>When 3+ Travelers of the same Gate type are on your field simultaneously, all receive a squad bonus. Lost the moment the squad drops below 3.</p>
 
     <h3>Revive</h3>
-    <p>Bring a creature back from the Graveyard at full HP. It enters the field in a sleeping state and is ready to act next turn. Revived creatures do not trigger On Enter effects.</p>
+    <p>Bring a creature back from the Graveyard at full HP. Enters sleeping. On Enter effects do not re-trigger.</p>
 
     <h3>Raise</h3>
-    <p>A special form of revival — the creature returns with only 1 HP, all its abilities intact, in sleeping state. Unlike Revive, Raise does not restore full health. Used by Phlegmor each turn automatically.</p>
-
-    <h3>On Turn Start</h3>
-    <p>This effect triggers automatically at the start of your turn, before you take any actions. Examples: Regen restores HP, Worlds and Artifacts provide their bonuses, Phlegmor raises a creature.</p>
-
-    <h3>On Enter</h3>
-    <p>This effect triggers the moment the card is played from hand to the field. It does NOT trigger when a creature is revived or raised from the graveyard.</p>
-
-    <h3>On Attack</h3>
-    <p>This effect triggers each time this creature attacks — whether targeting an enemy creature or the base.</p>
-
-    <h3>On Any / Own Death</h3>
-    <p>This effect triggers whenever a creature dies on the battlefield — by any cause. <em>On Any Death</em> counts all creatures; <em>On Own Death</em> counts only yours.</p>
-
-    <h3>On Play Creature</h3>
-    <p>This effect triggers each time you play a creature card from your hand to the field.</p>
-
+    <p>Revival at 1 HP instead of full. Used automatically by Phlegmor each turn.</p>
   </div>
 </div>
 
-<!-- LORE SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════
+     LORE SCREEN
+════════════════════════════════════════════════════════════ -->
 <div class="screen" id="loreScreen">
   <div class="screen-header">
     <button class="screen-back" onclick="hideScreen('lore')">← Back</button>
@@ -156,259 +148,256 @@
     <h2>Now</h2>
     <p>Two forces move through the remaining Worlds. One carries tea, memory, and the long patience of those who still believe the Path leads somewhere worth reaching. The other carries the strange clarity of dissolution — the knowledge that entropy, too, has its own direction.</p>
     <p>The outcome of this is not recorded yet.</p>
-    <p style="color:#444;font-size:9px;margin-top:32px;font-style:italic;">— For the complete record of what preceded these events, consult the Archive at archive.trianglecirclesquare.org</p>
+    <p class="lore-credit">— For the complete record, consult the Archive at archive.trianglecirclesquare.org</p>
   </div>
 </div>
 
-<!-- GAME -->
-<div class="game" id="game" style="display:none;flex-direction:column;" onclick="handleGameClick(event)">
+<!-- ═══════════════════════════════════════════════════════════
+     GAME
+════════════════════════════════════════════════════════════ -->
+<div class="game" id="game" style="display:none;" onclick="handleGameClick(event)">
 
-  <!-- HEADER -->
+  <!-- Header -->
   <div class="header">
-<div class="title"><img src="img/brand.png" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"><span style="font-family:'MEK',monospace;">HOME'S JOURNEY</span></div>
-    <div class="turn-info" id="turnInfo">Turn <span id="turnNum">1</span> · <span id="turnPlayer">TEA</span></div>
-    <div class="header-desktop-btns" style="gap:6px;margin-left:auto;">
-      <button class="btn" style="border-color:#5599ff;color:#5599ff;font-size:10px;padding:5px 12px;" onclick="toggleLog()">📋 Log</button>
-      <button class="btn btn-reset" style="font-size:10px;padding:5px 12px;" onclick="askRestart()">↺ Restart</button>
-      <button class="btn btn-reset" style="font-size:10px;padding:5px 12px;" onclick="askMenu()">← Menu</button>
+    <div class="title">
+      <img src="img/brand.png" class="brand-icon" alt=""> HOME'S JOURNEY
     </div>
-    <div class="header-mobile-btn" style="position:relative;margin-left:auto;">
-     <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleHamburger()">
-  <span class="ham-line"></span>
-  <span class="ham-line"></span>
-  <span class="ham-line"></span>
-</button>
-<div id="hamburgerMenu" class="ham-menu">
-  <button class="btn ham-item" onclick="toggleLog();toggleHamburger()">Log</button>
-  <button class="btn ham-item" onclick="askRestart();toggleHamburger()">Restart</button>
-  <button class="btn ham-item" onclick="askMenu();toggleHamburger()">Menu</button>
-</div>
+    <div class="turn-info">Turn <span id="turnNum">1</span> · <span id="turnPlayer">TEA</span></div>
+
+    <!-- Desktop nav -->
+    <div class="header-desktop-btns">
+      <button class="btn btn-log"   onclick="toggleLog()">📋 Log</button>
+      <button class="btn btn-reset" onclick="askRestart()">↺ Restart</button>
+      <button class="btn btn-reset" onclick="askMenu()">← Menu</button>
+    </div>
+
+    <!-- Mobile hamburger -->
+    <div class="header-mobile-btn">
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleHamburger()">
+        <span class="ham-line"></span>
+        <span class="ham-line"></span>
+        <span class="ham-line"></span>
+      </button>
+      <div id="hamburgerMenu" class="ham-menu">
+        <button class="btn ham-item" onclick="toggleLog();toggleHamburger()">Log</button>
+        <button class="btn ham-item" onclick="askRestart();toggleHamburger()">Restart</button>
+        <button class="btn ham-item" onclick="askMenu();toggleHamburger()">Menu</button>
+      </div>
     </div>
   </div>
 
-  <!-- OPP STATS -->
+  <!-- Opponent stats bar -->
   <div class="stats-bar jeet" id="oppStats" onclick="onBaseClick('jeet')">
-    <span class="player-name jeet">⬡ JEET CORE</span>
-    <span class="stat">🖤 <span class="stat-val hp-val" id="jeetHp">20</span>/20</span>
-    <span class="stat">💠 <span class="ess-val" id="jeetEss">1</span>/<span id="jeetEssMax">1</span></span>
-    <span class="stat" style="font-size:8px;color:#555">🃏<span id="jeetDeckCountStat">35</span> ☠<span id="jeetGraveCountStat">0</span></span>
+    <span class="stat">
+      <img src="./img/hp_jeet.png" class="stat-icon">
+      <span class="stat-val hp-val" id="jeetHp">20</span>
+    </span>
+    <span class="player-name jeet">JEET CORE</span>
+    <span class="stat">
+      <img src="./img/ess.png" class="stat-icon">
+      <span class="ess-val" id="jeetEss">1</span>/<span id="jeetEssMax">1</span>
+    </span>
   </div>
 
-  <!-- OPP HAND -->
+  <!-- Opponent hand (hidden) -->
   <div class="opp-hand-zone" id="oppHandZone">
     <div class="hand-mini" id="jeetHand"></div>
   </div>
 
-  <!-- OPP FIELD -->
+  <!-- Opponent field -->
   <div class="field-zone" id="oppFieldZone">
     <div class="battlefield" id="jeetField"></div>
-    <div class="persist" id="jeetPersist"></div>
+    <div class="persist"     id="jeetPersist"></div>
   </div>
 
-  <!-- PLAYER FIELD -->
+  <!-- Player field -->
   <div class="field-zone" id="playerFieldZone">
     <div class="battlefield" id="teaField"></div>
-    <div class="persist" id="teaPersist"></div>
+    <div class="persist"     id="teaPersist"></div>
   </div>
 
-  <!-- PLAYER STATS -->
+  <!-- Player stats bar -->
   <div class="stats-bar tea" id="playerStats" onclick="onBaseClick('tea')">
-    <span class="player-name tea">⬡ TAVERN</span>
-    <span class="stat">🤍 <span class="stat-val hp-val" id="teaHp">20</span>/20</span>
-    <span class="stat">💠 <span class="ess-val" id="teaEss">1</span>/<span id="teaEssMax">1</span></span>
-    <span class="stat" style="font-size:8px;color:#555">🃏<span id="teaDeckCountStat">35</span> ☠<span id="teaGraveCountStat">0</span></span>
+    <span class="stat">
+      <img src="./img/hp_tea.png" class="stat-icon">
+      <span class="stat-val hp-val" id="teaHp">20</span>
+    </span>
+    <span class="player-name tea">TAVERN</span>
+    <span class="stat">
+      <img src="./img/ess.png" class="stat-icon">
+      <span class="ess-val" id="teaEss">1</span>/<span id="teaEssMax">1</span>
+    </span>
   </div>
 
-  <!-- PLAYER HAND -->
+  <!-- Player hand -->
   <div class="player-hand-zone" id="playerHandZone">
-    <div class="hand" id="teaHand"></div>
+    <div class="player-hand-wrap">
+      <div class="hand" id="teaHand"></div>
+    </div>
   </div>
 
-  <!-- BOTTOM BARS -->
+  <!-- Bottom bars -->
   <div class="bottom-bar" id="teaBottomBar" style="display:none;">
-    <div style="position:relative;width:calc(7vh*0.57);height:calc(7vh*0.57);flex-shrink:0;">
+    <div class="bottom-bar-slot">
       <button class="btn-square btn-graveyard" onclick="openGraveModal('tea')" title="Graveyard"></button>
       <span class="btn-badge" id="teaGraveBadge">0</span>
     </div>
     <button class="btn btn-end" onclick="endTurn()">End Turn</button>
-    <div style="position:relative;width:calc(7vh*0.57);height:calc(7vh*0.57);">
-      <div class="btn-deck-placeholder" id="deckPlaceholderT" style="position:absolute;top:0;left:0;"></div>
+    <div class="bottom-bar-slot">
+      <div class="btn-deck-placeholder" id="deckPlaceholderT"></div>
       <span class="btn-badge" id="teaDeckBadge">0</span>
     </div>
-    <div id="hintT2" style="position:absolute;bottom:calc(7vh * -0.3);font-size:calc(7vh * 0.18);color:#c8a84b;text-align:center;width:100%;left:0;"></div>
+    <div class="bottom-bar-hint" id="hintT2"></div>
   </div>
+
   <div class="bottom-bar" id="jeetBottomBar" style="display:none;">
-    <div style="position:relative;width:calc(7vh*0.57);height:calc(7vh*0.57);flex-shrink:0;">
+    <div class="bottom-bar-slot">
       <button class="btn-square btn-graveyard" onclick="openGraveModal('jeet')" title="Graveyard"></button>
       <span class="btn-badge" id="jeetGraveBadge">0</span>
     </div>
     <button class="btn btn-end" onclick="endTurn()">End Turn</button>
-    <div style="position:relative;width:calc(7vh*0.57);height:calc(7vh*0.57);">
-      <div class="btn-deck-placeholder" id="deckPlaceholderJ" style="position:absolute;top:0;left:0;"></div>
+    <div class="bottom-bar-slot">
+      <div class="btn-deck-placeholder" id="deckPlaceholderJ"></div>
       <span class="btn-badge" id="jeetDeckBadge">0</span>
     </div>
-    <div id="hintJ2" style="position:absolute;bottom:calc(7vh * -0.3);font-size:calc(7vh * 0.18);color:#c8a84b;text-align:center;width:100%;left:0;"></div>
+    <div class="bottom-bar-hint" id="hintJ2"></div>
   </div>
 
-  
-<!-- GRAVEYARD MODAL -->
-<div class="modal-overlay hidden" id="graveModal" style="background:transparent;pointer-events:none;">
- <div class="modal" style="pointer-events:all;position:fixed;bottom:44px;left:14px;max-width:320px;max-height:60vh;overflow-y:auto;padding:0;border:1px solid #c8a84b33;background:#0a0a12;box-shadow:0 4px 20px #000000aa;" onclick="event.stopPropagation()">
-   <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #ffffff11;">
-     <span style="font-family:'MEK',monospace;font-size:18px;color:#c8a84b;" id="graveModalTitle">Graveyard</span>
-     <button class="log-panel-close" onclick="closeGraveModal()">X</button>
-   </div>
-   <div id="graveModalCards" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px;"></div>
- </div>
-</div>
-
-
-<!-- GLOBAL HINT -->
-  <div style="font-size:20px;color:#c8a84b;text-align:center;padding:4px 8px;min-height:16px;" id="hintGlobal"></div>
-
-  <!-- HIDDEN LOGIC ELEMENTS -->
-  <div style="display:none;">
-    <button id="hitBaseT"></button><button id="hitBaseJ"></button>
-    <button id="umbBtnT" class="hidden"></button><button id="umbBtnJ" class="hidden"></button>
-    <button id="vardanBtnT" class="hidden"></button><button id="vardanBtnJ" class="hidden"></button>
-    <div id="hintT"></div><div id="hintJ"></div>
-    <div id="jeetSidebarBtns"></div><div id="teaSidebarBtns"></div>
+  <!-- Graveyard modal -->
+  <div class="modal-overlay hidden grave-modal-overlay" id="graveModal" onclick="closeGraveModal()">
+    <div class="modal grave-modal" onclick="event.stopPropagation()">
+      <div class="grave-modal-header">
+        <span class="grave-modal-title" id="graveModalTitle">Graveyard</span>
+        <button class="log-panel-close" onclick="closeGraveModal()">✕</button>
+      </div>
+      <div class="grave-modal-cards" id="graveModalCards"></div>
+    </div>
   </div>
 
-  <!-- LOG PANEL -->
+  <!-- Log panel -->
   <div class="log-panel" id="logPanel">
     <div class="log-panel-header">
       <span class="log-panel-title">Battle Log</span>
-      <button class="log-panel-close" onclick="toggleLog()">X</button>
+      <button class="log-panel-close" onclick="toggleLog()">✕</button>
     </div>
     <div class="log" id="log"></div>
   </div>
 
-</div>
+  <!-- Hidden: legacy button stubs kept for any inline refs that may remain -->
+  <div style="display:none;">
+    <button id="hitBaseT"></button>
+    <button id="hitBaseJ"></button>
+    <div id="hintT"></div>
+    <div id="hintJ"></div>
+    <div id="jeetSidebarBtns"></div>
+    <div id="teaSidebarBtns"></div>
+  </div>
 
-<!-- CARD DETAIL MODAL -->
-<div class="card-detail-overlay" id="cardDetailOverlay" style="display:none" onclick="closeCardDetail(event)">
+</div><!-- /game -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     CARD DETAIL MODAL (Catalog)
+════════════════════════════════════════════════════════════ -->
+<div class="card-detail-overlay" id="cardDetailOverlay" onclick="closeCardDetail(event)">
   <div class="card-detail" id="cardDetailBox">
     <button class="card-detail-close" onclick="closeCardDetail()">✕</button>
-    <div class="card-detail-art" id="cdArt"></div>
-    <div class="card-detail-name" id="cdName"></div>
+    <div class="card-detail-art"   id="cdArt"></div>
+    <div class="card-detail-name"  id="cdName"></div>
     <div class="card-detail-cost"><span id="cdCost"></span></div>
     <div class="card-detail-stats" id="cdStats"></div>
-    <div class="card-detail-ab" id="cdAb"></div>
-    <div class="card-detail-tags" id="cdTags"></div>
+    <div class="card-detail-ab"    id="cdAb"></div>
+    <div class="card-detail-tags"  id="cdTags"></div>
   </div>
 </div>
 
-<!-- CATALOG SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════
+     CATALOG SCREEN
+════════════════════════════════════════════════════════════ -->
 <div class="screen" id="catalogScreen">
   <div class="screen-header">
     <button class="screen-back" onclick="hideScreen('catalog')">← Back</button>
     <div class="screen-title">Card Catalog</div>
   </div>
-  <div style="max-width:900px;margin:0 auto;padding:0 8px;">
+  <div class="catalog-wrap">
     <div class="catalog-filters">
       <input class="search-input" id="catalogSearch" placeholder="Search cards..." oninput="renderCatalog()">
       <div class="filter-group" id="factionFilters">
-        <button class="filter-btn active" data-faction="all" onclick="setFilter('faction','all',this)">All</button>
-        <button class="filter-btn" data-faction="tea" onclick="setFilter('faction','tea',this)">Tea</button>
-        <button class="filter-btn jeet-f" data-faction="jeet" onclick="setFilter('faction','jeet',this)">Jeet</button>
+        <button class="filter-btn active" onclick="setFilter('faction','all',this)">All</button>
+        <button class="filter-btn"        onclick="setFilter('faction','tea',this)">Tea</button>
+        <button class="filter-btn jeet-f" onclick="setFilter('faction','jeet',this)">Jeet</button>
       </div>
       <div class="filter-group" id="typeFilters">
-        <button class="filter-btn active" data-type="all" onclick="setFilter('type','all',this)">All Types</button>
-        <button class="filter-btn" data-type="creature" onclick="setFilter('type','creature',this)">Creatures</button>
-        <button class="filter-btn" data-type="unique" onclick="setFilter('type','unique',this)">1/1 Unique</button>
-        <button class="filter-btn" data-type="spell" onclick="setFilter('type','spell',this)">Spells</button>
-        <button class="filter-btn" data-type="world" onclick="setFilter('type','world',this)">Worlds</button>
-        <button class="filter-btn" data-type="artifact" onclick="setFilter('type','artifact',this)">Artifacts</button>
+        <button class="filter-btn active"  onclick="setFilter('type','all',this)">All Types</button>
+        <button class="filter-btn"         onclick="setFilter('type','creature',this)">Creatures</button>
+        <button class="filter-btn"         onclick="setFilter('type','unique',this)">1/1 Unique</button>
+        <button class="filter-btn"         onclick="setFilter('type','spell',this)">Spells</button>
+        <button class="filter-btn"         onclick="setFilter('type','world',this)">Worlds</button>
+        <button class="filter-btn"         onclick="setFilter('type','artifact',this)">Artifacts</button>
       </div>
-    </div>
-    <div class="filter-group" id="sortFilters" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
-      <span style="font-size:20px;color:#555;align-self:center;">Sort:</span>
-      <button class="filter-btn active" onclick="setSort('name',this)">A-Z</button>
-      <button class="filter-btn" onclick="setSort('cost',this)">Cost ↑</button>
-      <button class="filter-btn" onclick="setSort('hp',this)">HP ↓</button>
-      <button class="filter-btn" onclick="setSort('atk',this)">ATK ↓</button>
+      <div class="filter-group" id="sortFilters">
+        <span class="filter-label">Sort:</span>
+        <button class="filter-btn active" onclick="setSort('name',this)">A-Z</button>
+        <button class="filter-btn"        onclick="setSort('cost',this)">Cost ↑</button>
+        <button class="filter-btn"        onclick="setSort('hp',this)">HP ↓</button>
+        <button class="filter-btn"        onclick="setSort('atk',this)">ATK ↓</button>
+      </div>
     </div>
     <div class="cat-count" id="catalogCount"></div>
     <div class="catalog-grid" id="catalogGrid"></div>
   </div>
 </div>
 
-<!-- MODALS -->
+<!-- ═══════════════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════════════════ -->
+
+<!-- Confirm -->
 <div class="modal-overlay hidden" id="confirmModal">
   <div class="modal">
-    <h2 style="font-size:18px;">LEAVE GAME?</h2>
-    <p>Current game will be lost. Return to menu?</p>
-    <div style="display:flex;gap:10px;justify-content:center;">
-      <button class="btn" style="border-color:#e05555;color:#e05555;padding:6px 20px;font-size:18px;" onclick="confirmMenu()">Yes, Exit</button>
-      <button class="btn" style="border-color:#555" onclick="document.getElementById('confirmModal').classList.add('hidden')">Cancel</button>
+    <h2>ARE YOU SURE?</h2>
+    <p>Current game will be lost.</p>
+    <div class="modal-btns">
+      <button class="btn btn-danger" style="border-color:#e05555;color:#e05555;" onclick="confirmMenu()">Yes, Exit</button>
+      <button class="btn" onclick="document.getElementById('confirmModal').classList.add('hidden')">Cancel</button>
     </div>
   </div>
 </div>
 
+<!-- Win -->
 <div class="modal-overlay hidden" id="winModal">
   <div class="modal">
     <h2 id="winTitle">VICTORY</h2>
     <p id="winText"></p>
-    <button class="btn" style="border-color:#c8a84b;color:#c8a84b;padding:8px 24px;font-size:9px;" onclick="resetGame()">▶ Play Again</button>
-  </div>
-</div>
-<!-- MULLIGAN SCREEN -->
-<div class="modal-overlay hidden" id="mulliganScreen">
-  <div class="modal" style="width:auto;max-width:95vw;max-height:90vh;overflow-y:auto;">
-    <h2 id="mulliganTitle">PLAYER 1 — YOUR HAND</h2>
-    <p id="mulliganSub" style="font-size:14px;color:#555;margin-bottom:12px;">You may mulligan up to 3 times.</p>
-    <div id="mulliganCards" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;"></div>
-    <div style="display:flex;gap:10px;justify-content:center;">
-      <button class="btn" style="
-  background-image:url('img/btn_mulligan.png');
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-position:center;
-  background-color:transparent;
-  border:none;
-  width:134px;
-  height:calc(134px * 44/122);
-  color:transparent;
-  padding:0;
-" onclick="doMulliganPhase()"></button>
-  <button class="btn" style="
-  background-image:url('img/btn_ready.png');
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-position:center;
-  background-color:transparent;
-  border:none;
-  width:134px;
-  height:calc(134px * 44/122);
-  color:transparent;
-  padding:0;
-" onclick="readyFromMulligan()"></button>
-    </div>
-    <div id="mulliganInfo" style="font-size:12px;color:#555;margin-top:10px;"></div>
+    <button class="btn btn-gold" onclick="resetGame()">▶ Play Again</button>
   </div>
 </div>
 
-<!-- PASS DEVICE SCREEN -->
+<!-- Mulligan -->
+<div class="modal-overlay hidden" id="mulliganScreen">
+  <div class="modal modal-wide">
+    <h2 id="mulliganTitle">PLAYER 1 — YOUR HAND</h2>
+    <p class="modal-sub">You may mulligan up to 3 times.</p>
+    <div class="mulligan-cards" id="mulliganCards"></div>
+    <div class="modal-btns">
+      <button class="btn btn-img" style="background-image:url('img/btn_mulligan.png');" onclick="doMulliganPhase()"></button>
+      <button class="btn btn-img" style="background-image:url('img/btn_ready.png');"    onclick="readyFromMulligan()"></button>
+    </div>
+    <div class="modal-info" id="mulliganInfo"></div>
+  </div>
+</div>
+
+<!-- Pass device -->
 <div class="modal-overlay hidden" id="passScreen">
   <div class="modal">
     <h2 id="passTitle">PASS THE DEVICE</h2>
-    <p id="passText">Hand the device .</p>
-    <button class="btn" style="
-  background-image:url('img/btn_ready.png');
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-position:center;
-  background-color:transparent;
-  border:none;
-  width:134px;
-  height:calc(134px * 44/122);
-  color:transparent;
-  padding:0;
-" onclick="startJeetMulligan()"></button>
+    <p id="passText">Hand the device to Player 2 — Jeet Core.</p>
+    <button class="btn btn-img" style="background-image:url('img/btn_ready.png');" onclick="startJeetMulligan()"></button>
   </div>
 </div>
-<!-- SCRIPTS (order matters: data → abilities → deck → state → render → game → catalog → ui) -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCRIPTS  (order matters)
+════════════════════════════════════════════════════════════ -->
 <script src="js/data.js"></script>
 <script src="js/abilities.js"></script>
 <script src="js/deck.js"></script>
