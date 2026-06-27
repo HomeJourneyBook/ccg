@@ -1,12 +1,7 @@
 // ============================================================
 //  render.js — DOM rendering
-//  render()          full redraw
-//  mkSmallEl(card)   field card (compact)
-//  mkEl(card, zone)  hand / preview / grave card (full size)
-//  rZone / rPersist / reorderZones / adjustHandOverlap
 // ============================================================
 
-// Tag icons shown on field cards
 const TAG_ICONS = {
   fear:    `<img src="img/ico_fear.png"    style="width:60%;height:60%;">`,
   pierce:  `<img src="img/ico_pierce.png"  style="width:60%;height:60%;">`,
@@ -33,82 +28,68 @@ function getTypeDotImg(card) {
   return 'img/type_creature.png';
 }
 
-// ── Turn colour update ────────────────────────────────────────
 function updateTurnColors() {
   if (!G) return;
-  const isTea     = G.turn === 'tea';
-  const green     = '#2d8b3a', greenDim = '#1b641b55';
-  const pink      = '#d83c88', pinkDim  = '#d83c8855';
-  const set       = (id, col) => { const el = document.getElementById(id); if (el) el.style.borderColor = col; };
-  const botColor  = isTea ? green   : pink;
-  const topDim    = isTea ? pinkDim : greenDim;
-  set('playerFieldZone', botColor);
-  set('playerStats',     botColor);
-  set('oppFieldZone',    topDim);
-  set('oppStats',        topDim);
-  set('oppHandZone',     topDim);
+  const isTea    = G.turn === 'tea';
+  const green    = '#2d8b3a', greenDim = '#1b641b55';
+  const pink     = '#d83c88', pinkDim  = '#d83c8855';
+  const set      = (id, col) => { const el = document.getElementById(id); if (el) el.style.borderColor = col; };
+  set('playerFieldZone', isTea ? green   : pink);
+  set('playerStats',     isTea ? green   : pink);
+  set('oppFieldZone',    isTea ? pinkDim : greenDim);
+  set('oppStats',        isTea ? pinkDim : greenDim);
+  set('oppHandZone',     isTea ? pinkDim : greenDim);
 }
 
-// ── Main render ───────────────────────────────────────────────
 function render() {
   updateTurnColors();
-
-  // Turn indicator
   document.getElementById('turnNum').textContent    = G.turnNum;
   document.getElementById('turnPlayer').textContent = G.turn.toUpperCase();
 
-  // Counters for both factions
   ['tea', 'jeet'].forEach(f => {
     const p = G[f];
     document.getElementById(f + 'Hp').textContent     = p.hp;
     document.getElementById(f + 'Ess').textContent    = p.ess;
     document.getElementById(f + 'EssMax').textContent = p.essMax;
-    const hc = document.getElementById(f + 'HandCount');   if (hc) hc.textContent = p.hand.length;
+    const hc = document.getElementById(f + 'HandCount');    if (hc) hc.textContent = p.hand.length;
     const dc = document.getElementById(f + 'DeckCountStat');if (dc) dc.textContent = p.deck.length;
     const gc = document.getElementById(f + 'GraveCountStat');if(gc) gc.textContent = p.grave.length;
-    const gb = document.getElementById(f + 'GraveBadge');  if (gb) gb.textContent = p.grave.length;
-    const db = document.getElementById(f + 'DeckBadge');   if (db) db.textContent = p.deck.length;
+    const gb = document.getElementById(f + 'GraveBadge');   if (gb) gb.textContent = p.grave.length;
+    const db = document.getElementById(f + 'DeckBadge');    if (db) db.textContent = p.deck.length;
   });
 
-  // Fields
   rZone('teaField',  G.tea.field,  'field');
   rZone('jeetField', G.jeet.field, 'field');
 
-  // Hands — active player sees their cards; opponent's hand is hidden
   if (G.turn === 'tea') {
     document.getElementById('teaHand').className = 'hand';
-    rZone('teaHand',   G.tea.hand,  'hand');
+    rZone('teaHand',  G.tea.hand,  'hand');
     rHiddenHand('jeetHand', G.jeet.hand, 'jeet');
   } else {
     document.getElementById('jeetHand').className = 'hand';
-    rZone('jeetHand',  G.jeet.hand, 'hand');
+    rZone('jeetHand', G.jeet.hand, 'hand');
     rHiddenHand('teaHand',  G.tea.hand,  'tea');
   }
 
-  // Persistent zones (worlds + artifacts)
   rPersist('teaPersist',  G.tea);
   reorderZones();
   rPersist('jeetPersist', G.jeet);
 
-  // Hand z-index: elevated when a card is previewed
   ['teaHand', 'jeetHand'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.zIndex = G.previewCard ? '500' : '50';
   });
 
-  // Sidebar & bottom bar visibility
-  const actF  = G.turn;
-  const inactF= G.turn === 'tea' ? 'jeet' : 'tea';
+  const actF   = G.turn;
+  const inactF = G.turn === 'tea' ? 'jeet' : 'tea';
   const s = (id, v) => { const el = document.getElementById(id); if (el) el.style.display = v; };
   s(inactF + 'SidebarBtns', 'none');
   s(actF   + 'SidebarBtns', 'flex');
   s(inactF + 'BottomBar',   'none');
   s(actF   + 'BottomBar',   'flex');
 
-  // Mulligan button state
   updateMulliganBtn(G.turn);
 
-  // Base targetable highlight
   const oppZoneEl = document.getElementById('oppStats');
   if (oppZoneEl) {
     const canHit = (G.phase === 'selectTarget' || G.phase === 'healTarget') && G.sel && canAttackBase();
@@ -117,22 +98,24 @@ function render() {
   const playerStatsEl = document.getElementById('playerStats');
   if (playerStatsEl) playerStatsEl.classList.remove('base-targetable');
 
-  // Phase hint text
-  const sfx = G.turn === 'tea' ? 'T' : 'J';
+  const sfx   = G.turn === 'tea' ? 'T' : 'J';
   const hitEl = document.getElementById('hitBase' + sfx);
   if (hitEl) hitEl.style.display = 'none';
+
   const hints = {
-    action:       '',
-    selectTarget: 'Select enemy or tap their base.',
-    burn:         'Select a card from your hand to burn.',
-    healTarget:   'Select ally to heal or enemy to attack.',
-    shardTarget:  'Select an enemy creature.',
+    action:          '',
+    selectTarget:    'Select enemy or tap their base.',
+    burn:            'Select a card from your hand to burn.',
+    healTarget:      'Select ally to heal or enemy to attack.',
+    shardTarget:     'Select an enemy creature.',
     sacrificeTarget: 'Select one of your creatures to sacrifice.',
   };
   const hintEl = document.getElementById('hint' + sfx + '2');
   if (hintEl) hintEl.textContent = hints[G.phase] || '';
 
   if (typeof _applyPendingFlash === 'function') _applyPendingFlash();
+
+  requestAnimationFrame(() => { adjustHandOverlap(); requestAnimationFrame(adjustHandOverlap); });
 }
 
 // ── Field card (compact) ──────────────────────────────────────
@@ -141,22 +124,18 @@ function mkSmallEl(card) {
   d.className  = `card-small ${card.f}-card`;
   d.dataset.id = card.id;
 
-  // State classes
   if (card.id === G.sel) d.classList.add('selected');
   if (card.sleeping)     d.classList.add('sleeping');
   if (card.exhausted)    d.classList.add('exhausted');
   if (card.feared)       d.classList.add('feared');
   if (card.burning)      d.classList.add('burning');
 
-  // Invisible label
   if (hasTag(card, 'invisible')) {
     const inv = document.createElement('span');
-    inv.className   = 'tag-label';
-    inv.textContent = 'Invis';
+    inv.className = 'tag-label'; inv.textContent = 'Invis';
     d.appendChild(inv);
   }
 
-  // Phase-dependent highlight classes
   const opp        = G.turn === 'tea' ? 'jeet' : 'tea';
   const attCard    = G.sel ? findC(G.sel) : null;
   const oppTargets = getTargetableCards(G[opp].field, attCard);
@@ -183,19 +162,20 @@ function mkSmallEl(card) {
       ? `<div class="card-small-stats">
            <div class="card-small-hp-box"><span class="card-small-hp">${card.hp}</span></div>
            <img src="img/chel.png" class="card-stats-icon">
-           <div class="card-small-atk-box"><span class="card-small-atk">${card.atk + (card.atkBonus||0) + (card.rageBonus||0) + (card.squadAtkBonus||0)}</span></div>
+           <div class="card-small-atk-box"><span class="card-small-atk">${card.atk+(card.atkBonus||0)+(card.rageBonus||0)+(card.squadAtkBonus||0)}</span></div>
          </div>`
       : `<div class="card-small-stats" style="justify-content:center;"><img src="img/chel.png" class="card-stats-icon"></div>`
     }`;
 
-  // Active ability popup for selected AOE / heal creatures
+  // AOE popup — appears when card is selected, fires doActiveAoe on click
   if (card.id === G.sel && card.f === G.turn && !card.exhausted && !card.sleeping && !card.feared) {
     if (hasTag(card, 'aoe') && !card.unique) {
       const pop = document.createElement('div');
       pop.className = 'field-ability-popup';
       const btn = document.createElement('button');
       btn.className = 'fab-btn umbasir';
-      btn.onclick   = e => { e.stopPropagation(); G.sel = card.id; doActiveAoe(card); };
+      btn.title     = 'AOE Attack';
+      btn.onclick   = e => { e.stopPropagation(); doActiveAoe(card); };
       pop.appendChild(btn);
       d.appendChild(pop);
     }
@@ -205,7 +185,7 @@ function mkSmallEl(card) {
   return d;
 }
 
-// ── Hand/preview card (full size) ────────────────────────────
+// ── Hand/preview card (full size) ─────────────────────────────
 function mkEl(card, zone) {
   const d = document.createElement('div');
   d.className      = `card ${card.f}-card`;
@@ -220,34 +200,31 @@ function mkEl(card, zone) {
 
   if (hasTag(card, 'invisible')) {
     const inv = document.createElement('span');
-    inv.className   = 'tag-label';
-    inv.textContent = '👻 Invis';
+    inv.className = 'tag-label'; inv.textContent = '👻 Invis';
     d.appendChild(inv);
   }
 
-  // Phase highlights (for hand cards in sacrifice/shard phases)
   if (G.phase === 'sacrificeTarget' && card.f === G.turn && zone === 'field' && !card.spell && !card.world && !card.artifact)
     d.classList.add('targetable');
   if (G.phase === 'shardTarget' && card.f !== G.turn && zone === 'field' && !card.spell && !card.world && !card.artifact)
     d.classList.add('targetable');
   if (G.phase === 'selectTarget' && card.f !== G.turn && zone === 'field') {
-    const oppField   = G[card.f].field;
-    const attE       = G.sel ? findC(G.sel) : null;
-    if (getTargetableCards(oppField, attE).includes(card.id)) d.classList.add('targetable');
+    if (getTargetableCards(G[card.f].field, G.sel ? findC(G.sel) : null).includes(card.id))
+      d.classList.add('targetable');
   }
   if (G.phase === 'healTarget' && card.f === G.turn && zone === 'field' && !card.spell && !card.world && !card.artifact && card.hp < card.maxHp)
     d.classList.add('healable');
   if (G.phase === 'healTarget' && card.f !== G.turn && zone === 'field') {
-    const oppFieldH  = G[card.f].field;
-    const attH       = G.sel ? findC(G.sel) : null;
-    if (getTargetableCards(oppFieldH, attH).includes(card.id)) d.classList.add('targetable');
+    if (getTargetableCards(G[card.f].field, G.sel ? findC(G.sel) : null).includes(card.id))
+      d.classList.add('targetable');
   }
 
   const isSW = card.spell || card.world || card.artifact;
 
-  // World cards get a special layout
+  // World cards: art as CSS background, name + ability text overlay
   if (card.world) {
     d.classList.add('world-card');
+    if (card.img) d.classList.add('world-img-' + card.img.replace('.', '_'));
     d.innerHTML = `
       <div class="card-cost">${card.cost}</div>
       <div class="card-type-dot" style="background-image:url('${getTypeDotImg(card)}');background-size:contain;background-repeat:no-repeat;background-position:center;"></div>
@@ -265,13 +242,13 @@ function mkEl(card, zone) {
         ? `<div class="card-stats">
              <div class="card-hp-box"><span class="card-hp"><img src="./img/heart.png" class="stat-icon">${card.maxHp}</span></div>
              <img src="img/chel.png" class="card-stats-icon">
-             <div class="card-atk-box"><span class="card-atk"><img src="./img/attack.png" class="stat-icon">${card.atk + (card.atkBonus||0) + (card.rageBonus||0) + (card.squadAtkBonus||0)}</span></div>
+             <div class="card-atk-box"><span class="card-atk"><img src="./img/attack.png" class="stat-icon">${card.atk+(card.atkBonus||0)+(card.rageBonus||0)+(card.squadAtkBonus||0)}</span></div>
            </div>`
         : `<div class="card-stats" style="justify-content:center;"><img src="img/chel.png" class="card-stats-icon"></div>`}
       <div class="card-ability-box"><div class="card-ability">${card.ab}</div></div>`;
   }
 
-  // Play / Burn popup when card is previewed in hand
+  // Play/Burn popup when previewed in hand
   if (card.id === G.previewCard && zone === 'hand') {
     d.classList.add('previewed');
     d.style.zIndex = '';
@@ -298,22 +275,18 @@ function mkEl(card, zone) {
 }
 
 // ── Zone renderers ────────────────────────────────────────────
-
-// Render a zone (field or hand). Field cards use mkSmallEl with death animations.
 function rZone(id, cards, zone) {
   const el = document.getElementById(id);
 
   if (zone === 'field') {
-    // Animate dying cards before removing
     const dying = [];
     el.querySelectorAll('.card-small').forEach(cardEl => {
       if (!cards.find(c => String(c.id) === cardEl.dataset.id)) dying.push(cardEl);
     });
     dying.forEach(cardEl => { cardEl.classList.add('dying'); cardEl.style.pointerEvents = 'none'; });
-    if (dying.length > 0) {
+    if (dying.length > 0)
       setTimeout(() => dying.forEach(cardEl => { if (cardEl.parentElement) cardEl.remove(); }), 400);
-    }
-    // Update live cards in-place; add new ones with entering animation
+
     const existingMap = {};
     el.querySelectorAll('.card-small:not(.dying)').forEach(cardEl => { existingMap[cardEl.dataset.id] = cardEl; });
     cards.forEach(c => {
@@ -328,59 +301,48 @@ function rZone(id, cards, zone) {
     return;
   }
 
-  // Hand / other zones: full rebuild
   el.innerHTML = '';
   cards.forEach(c => el.appendChild(mkEl(c, zone)));
 }
 
-// Render opponent's hidden hand (card backs)
 function rHiddenHand(id, cards, faction) {
   const el = document.getElementById(id);
-  el.innerHTML  = '';
-  el.className  = 'hand-mini';
+  el.innerHTML = ''; el.className = 'hand-mini';
   cards.forEach(() => {
     const d = document.createElement('div');
     d.className = `card-mini ${faction}-mini`;
-    d.style.backgroundImage    = "url('img/runaha.png')";
-    d.style.backgroundSize     = 'cover';
-    d.style.backgroundPosition = 'bottom';
+    d.style.backgroundImage = "url('img/runaha.png')";
+    d.style.backgroundSize = 'cover'; d.style.backgroundPosition = 'bottom';
     el.appendChild(d);
   });
 }
 
-// Render world + artifact cards in the persistent zone.
-// Click handlers for artifacts are defined here since they depend on render state.
 function rPersist(id, player) {
   const el  = document.getElementById(id);
   el.innerHTML = '';
-  const cls = player === G.tea ? 'tcp' : 'jcp';
+  const cls            = player === G.tea ? 'tcp' : 'jcp';
   const isActivePlayer = (player === G.tea ? 'tea' : 'jeet') === G.turn;
 
-  // World
   if (player.world) {
     const d = document.createElement('div');
-    d.className   = `pcard ${cls}`;
+    d.className = `pcard ${cls}`;
     d.textContent = `${player.world.art} ${player.world.name}`;
-    d.title       = player.world.ab;
+    d.title = player.world.ab;
     el.appendChild(d);
   }
 
-  // Artifacts
   player.artifacts.forEach(a => {
     const d = document.createElement('div');
-    d.className   = `pcard ${cls}`;
+    d.className = `pcard ${cls}`;
     d.textContent = `${a.art} ${a.name}`;
-    d.title       = a.ab;
+    d.title = a.ab;
 
     if (!isActivePlayer || a.sleeping || a.exhausted) {
-      // Opponent's artifact or artifact not yet ready
-      if (!isActivePlayer || a.sleeping || a.exhausted) d.style.opacity = '0.5';
+      d.style.opacity = '0.5';
     } else if (hasTag(a, 'shard')) {
       d.classList.add('pcard-active');
       if (G.phase === 'shardTarget') {
-        d.style.border      = '2px solid #e05050';
-        d.style.boxShadow   = '0 0 8px #e05050';
-        d.style.borderRadius= '6px';
+        d.style.border = '2px solid #e05050'; d.style.boxShadow = '0 0 8px #e05050'; d.style.borderRadius = '6px';
         d.addEventListener('click', e => { e.stopPropagation(); doShard(a); });
       } else if (G.phase === 'action') {
         d.addEventListener('click', e => { e.stopPropagation(); doShard(a); });
@@ -388,43 +350,34 @@ function rPersist(id, player) {
     } else if (hasTag(a, 'sacrifice')) {
       d.classList.add('pcard-active');
       if (G.phase === 'sacrificeTarget') {
-        d.style.border      = '2px solid #b44fd4';
-        d.style.boxShadow   = '0 0 8px #b44fd4';
-        d.style.borderRadius= '6px';
+        d.style.border = '2px solid #b44fd4'; d.style.boxShadow = '0 0 8px #b44fd4'; d.style.borderRadius = '6px';
         d.addEventListener('click', e => { e.stopPropagation(); G.phase = 'action'; G.sel = null; render(); });
       } else if (G.phase === 'action') {
         d.addEventListener('click', e => {
-          e.stopPropagation();
-          G.phase = 'sacrificeTarget'; G.sel = a.id;
-          lg('Altar: select a creature to sacrifice.', 'hint');
-          render();
+          e.stopPropagation(); G.phase = 'sacrificeTarget'; G.sel = a.id;
+          lg('Altar: select a creature to sacrifice.', 'hint'); render();
         });
       }
     }
-
     el.appendChild(d);
   });
 
   if (!player.world && player.artifacts.length === 0) {
     const d = document.createElement('div');
-    d.className   = 'empty-persist';
-    d.textContent = 'none';
+    d.className = 'empty-persist'; d.textContent = 'none';
     el.appendChild(d);
   }
 }
 
 // ── Zone reorder (hotseat swap) ───────────────────────────────
-// Physically repositions DOM zones so the active player is always at the bottom.
-// NOTE: In AI/online mode this won't be needed — playerFaction will be fixed.
 function reorderZones() {
-  const oppK   = G.turn === 'tea' ? 'jeet' : 'tea';
-  const playerK= G.turn;
-  const oppP   = G[oppK];
-  const playerP= G[playerK];
+  const oppK    = G.turn === 'tea' ? 'jeet' : 'tea';
+  const playerK = G.turn;
+  const oppP    = G[oppK];
+  const playerP = G[playerK];
 
-  // Rebuild stats bars with correct faction data
-  const oppStats   = document.getElementById('oppStats');
-  const playerStats= document.getElementById('playerStats');
+  const oppStats    = document.getElementById('oppStats');
+  const playerStats = document.getElementById('playerStats');
   if (oppStats) {
     oppStats.className = 'stats-bar ' + oppK;
     oppStats.innerHTML = `
@@ -442,63 +395,42 @@ function reorderZones() {
     playerStats.onclick = () => onBaseClick(playerK);
   }
 
-  // Move field and persist zones to correct containers
-  const oppFieldZone   = document.getElementById('oppFieldZone');
-  const playerFieldZone= document.getElementById('playerFieldZone');
-  const jeetField  = document.getElementById('jeetField');
-  const jeetPersist= document.getElementById('jeetPersist');
-  const teaField   = document.getElementById('teaField');
-  const teaPersist = document.getElementById('teaPersist');
-
-  if (oppFieldZone && playerFieldZone) {
-    if (oppK === 'jeet') {
-      if (jeetField  && jeetField.parentElement  !== oppFieldZone)   oppFieldZone.appendChild(jeetField);
-      if (jeetPersist&& jeetPersist.parentElement!== oppFieldZone)   oppFieldZone.appendChild(jeetPersist);
-      if (teaField   && teaField.parentElement   !== playerFieldZone) playerFieldZone.appendChild(teaField);
-      if (teaPersist && teaPersist.parentElement !== playerFieldZone) playerFieldZone.appendChild(teaPersist);
-    } else {
-      if (teaField   && teaField.parentElement   !== oppFieldZone)   oppFieldZone.appendChild(teaField);
-      if (teaPersist && teaPersist.parentElement !== oppFieldZone)   oppFieldZone.appendChild(teaPersist);
-      if (jeetField  && jeetField.parentElement  !== playerFieldZone) playerFieldZone.appendChild(jeetField);
-      if (jeetPersist&& jeetPersist.parentElement!== playerFieldZone) playerFieldZone.appendChild(jeetPersist);
-    }
+  const move = (elId, targetId) => {
+    const el = document.getElementById(elId), tgt = document.getElementById(targetId);
+    if (el && tgt && el.parentElement !== tgt) tgt.appendChild(el);
+  };
+  if (oppK === 'jeet') {
+    move('jeetField','oppFieldZone'); move('jeetPersist','oppFieldZone');
+    move('teaField','playerFieldZone'); move('teaPersist','playerFieldZone');
+    move('jeetHand','oppHandZone'); move('teaHand','playerHandZone');
+  } else {
+    move('teaField','oppFieldZone'); move('teaPersist','oppFieldZone');
+    move('jeetField','playerFieldZone'); move('jeetPersist','playerFieldZone');
+    move('teaHand','oppHandZone'); move('jeetHand','playerHandZone');
   }
 
-  // Move hand zones
-  const oppHandZone   = document.getElementById('oppHandZone');
-  const playerHandZone= document.getElementById('playerHandZone');
-  const jeetHand = document.getElementById('jeetHand');
-  const teaHand  = document.getElementById('teaHand');
-  if (oppHandZone && playerHandZone) {
-    if (oppK === 'jeet') {
-      if (jeetHand && jeetHand.parentElement !== oppHandZone)    oppHandZone.appendChild(jeetHand);
-      if (teaHand  && teaHand.parentElement  !== playerHandZone) playerHandZone.appendChild(teaHand);
-    } else {
-      if (teaHand  && teaHand.parentElement  !== oppHandZone)    oppHandZone.appendChild(teaHand);
-      if (jeetHand && jeetHand.parentElement !== playerHandZone) playerHandZone.appendChild(jeetHand);
-    }
-  }
-
-  // Bottom bars
   const teaBB  = document.getElementById('teaBottomBar');
   const jeetBB = document.getElementById('jeetBottomBar');
   if (teaBB)  teaBB.style.display  = G.turn === 'tea'  ? 'flex' : 'none';
   if (jeetBB) jeetBB.style.display = G.turn === 'jeet' ? 'flex' : 'none';
 }
 
-// ── Hand overlap ──────────────────────────────────────────────
-// Adjusts negative margins so hand cards fan out but never overflow the container.
+// ── Hand: overlap (desktop) / carousel (mobile) ───────────────
 function adjustHandOverlap() {
+  const isMobile = window.innerWidth <= 600;
   ['teaHand', 'jeetHand'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
+
+    if (isMobile) { _applyCarousel(el); return; }
+
+    // Desktop: negative-margin fan
     const wrap = el.closest('.player-hand-wrap');
     let containerW = wrap ? wrap.getBoundingClientRect().width : el.getBoundingClientRect().width;
     containerW = Math.floor(containerW) - 12;
     if (containerW <= 20) containerW = window.innerWidth - 90 - 24;
     if (containerW <= 20) return;
 
-    // Full-size hand cards
     const cards = el.querySelectorAll('.card');
     if (cards.length > 0) {
       const cardW = cards[0].getBoundingClientRect().width || parseFloat(getComputedStyle(cards[0]).width) || 118;
@@ -515,10 +447,12 @@ function adjustHandOverlap() {
         card.style.marginRight = i === total - 1 ? '0px' : margin + 'px';
         card.style.zIndex      = (!G.previewCard || card.dataset.id !== G.previewCard) ? String(i + 1) : '';
         card.style.flexShrink  = '0';
+        card.style.transform   = '';
+        card.style.position    = '';
+        card.style.opacity     = '';
       });
     }
 
-    // Mini card backs (opponent's hidden hand)
     const minis = el.querySelectorAll('.card-mini');
     if (minis.length > 0) {
       const cardW = minis[0].getBoundingClientRect().width || parseFloat(getComputedStyle(minis[0]).width) || 36;
@@ -537,4 +471,94 @@ function adjustHandOverlap() {
       });
     }
   });
+}
+
+// ── Carousel (mobile) ────────────────────────────────────────
+// Cards fan in an arc; swipe or arrow buttons to navigate.
+// Centre card is the previewed/active one.
+
+const _carousel = { tea: { idx: 0 }, jeet: { idx: 0 } };
+
+function _applyCarousel(el) {
+  const cards = [...el.querySelectorAll('.card')];
+  if (cards.length === 0) return;
+  const faction = el.id === 'teaHand' ? 'tea' : 'jeet';
+  const state   = _carousel[faction];
+  state.idx     = Math.max(0, Math.min(state.idx, cards.length - 1));
+  const active  = state.idx;
+  const spread  = Math.min(26, 160 / Math.max(cards.length, 1));
+
+  el.style.position = 'relative';
+  el.style.height   = 'var(--card-h)';
+  el.style.overflow = 'visible';
+
+  cards.forEach((card, i) => {
+    const delta   = i - active;
+    const deg     = delta * spread;
+    const lift    = i === active ? -14 : 0;
+    const scale   = i === active ? 1.06 : 0.80;
+    const zIdx    = i === active ? 200 : 10 - Math.abs(delta);
+    const opacity = Math.abs(delta) > 3 ? 0.25 : 1 - Math.abs(delta) * 0.18;
+    card.style.position      = 'absolute';
+    card.style.left          = '50%';
+    card.style.bottom        = '0px';
+    card.style.marginLeft    = 'calc(var(--card-w) * -0.5)';
+    card.style.transformOrigin = '50% 120%';
+    card.style.transform     = `rotate(${deg}deg) translateY(${lift}px) scale(${scale})`;
+    card.style.zIndex        = String(zIdx);
+    card.style.opacity       = String(opacity);
+    card.style.transition    = 'transform 0.18s ease, opacity 0.18s ease';
+    card.style.flexShrink    = '0';
+  });
+
+  if (!el._carouselReady) {
+    _attachCarouselSwipe(el, faction);
+    el._carouselReady = true;
+  }
+  _updateCarouselArrows(el, faction, cards.length);
+}
+
+function _attachCarouselSwipe(el, faction) {
+  let startX = null;
+  el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', e => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 30) _carouselStep(faction, dx < 0 ? 1 : -1);
+    startX = null;
+  }, { passive: true });
+}
+
+function _carouselStep(faction, dir) {
+  const el    = document.getElementById(faction === 'tea' ? 'teaHand' : 'jeetHand');
+  if (!el) return;
+  const total = el.querySelectorAll('.card').length;
+  _carousel[faction].idx = Math.max(0, Math.min(_carousel[faction].idx + dir, total - 1));
+  _applyCarousel(el);
+}
+
+function _updateCarouselArrows(el, faction, total) {
+  const wrap = el.closest('.player-hand-wrap');
+  if (!wrap) return;
+  let arrowL = wrap.querySelector('.carousel-arrow-l');
+  let arrowR = wrap.querySelector('.carousel-arrow-r');
+  if (!arrowL) {
+    arrowL = document.createElement('button');
+    arrowL.className = 'carousel-arrow carousel-arrow-l';
+    arrowL.textContent = '‹';
+    arrowL.onclick = e => { e.stopPropagation(); _carouselStep(faction, -1); };
+    wrap.appendChild(arrowL);
+  }
+  if (!arrowR) {
+    arrowR = document.createElement('button');
+    arrowR.className = 'carousel-arrow carousel-arrow-r';
+    arrowR.textContent = '›';
+    arrowR.onclick = e => { e.stopPropagation(); _carouselStep(faction, 1); };
+    wrap.appendChild(arrowR);
+  }
+  const idx = _carousel[faction].idx;
+  arrowL.style.opacity       = idx === 0         ? '0.2' : '1';
+  arrowL.style.pointerEvents = idx === 0         ? 'none' : 'auto';
+  arrowR.style.opacity       = idx === total - 1 ? '0.2' : '1';
+  arrowR.style.pointerEvents = idx === total - 1 ? 'none' : 'auto';
 }
