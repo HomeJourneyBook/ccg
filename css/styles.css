@@ -732,3 +732,56 @@ display:flex;flex-direction:row;align-items:center;justify-content:center;gap:1p
   from{opacity:0;transform:scale(0.9);}
   to{opacity:1;transform:scale(1);}
 }
+
+/* ── Carousel (mobile hand) ───────────────────────────────────
+   Appended to styles.css
+   ─────────────────────────────────────────────────────────── */
+
+/* Arrow nav buttons */
+.carousel-arrow {
+  position: absolute;
+  bottom: 50%;
+  transform: translateY(50%);
+  z-index: 300;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid #c8a84b66;
+  color: #c8a84b;
+  font-size: 28px;
+  line-height: 1;
+  width: 32px;
+  height: 48px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: opacity 0.15s;
+  pointer-events: auto;
+}
+.carousel-arrow-l { left: 2px; }
+.carousel-arrow-r { right: 2px; }
+.carousel-arrow:active { background: rgba(200,168,75,0.2); }
+
+/* Hide arrows on desktop */
+@media (min-width: 601px) {
+  .carousel-arrow { display: none !important; }
+}
+
+/* On mobile: hand zone needs enough height for the arc */
+@media (max-width: 600px) {
+  .player-hand-zone {
+    height: calc(var(--card-h) + 20px);
+    overflow: visible;
+    position: relative;
+  }
+  .player-hand-wrap {
+    position: relative;
+    overflow: visible;
+  }
+  /* Previewed card in carousel: lift straight up, no rotation */
+  .hand .card.previewed {
+    transform: rotate(0deg) translateY(-20px) scale(1.08) !important;
+    z-index: 2000 !important;
+  }
+}
