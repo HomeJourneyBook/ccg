@@ -28,6 +28,7 @@ function getTypeDotImg(card) {
   return 'img/type_creature.png';
 }
 
+// ── Turn colour update ────────────────────────────────────────
 function updateTurnColors() {
   if (!G) return;
   const isTea    = G.turn === 'tea';
@@ -41,6 +42,7 @@ function updateTurnColors() {
   set('oppHandZone',     isTea ? pinkDim : greenDim);
 }
 
+// ── Main render ───────────────────────────────────────────────
 function render() {
   updateTurnColors();
   document.getElementById('turnNum').textContent    = G.turnNum;
@@ -167,7 +169,7 @@ function mkSmallEl(card) {
       : `<div class="card-small-stats" style="justify-content:center;"><img src="img/chel.png" class="card-stats-icon"></div>`
     }`;
 
-  // AOE popup — appears when card is selected, fires doActiveAoe on click
+  // AOE popup — selected non-exhausted AOE creature shows action button
   if (card.id === G.sel && card.f === G.turn && !card.exhausted && !card.sleeping && !card.feared) {
     if (hasTag(card, 'aoe') && !card.unique) {
       const pop = document.createElement('div');
@@ -221,7 +223,7 @@ function mkEl(card, zone) {
 
   const isSW = card.spell || card.world || card.artifact;
 
-  // World cards: art as CSS background, name + ability text overlay
+  // World cards: background image via CSS class, text overlay
   if (card.world) {
     d.classList.add('world-card');
     if (card.img) d.classList.add('world-img-' + card.img.replace('.', '_'));
@@ -248,7 +250,7 @@ function mkEl(card, zone) {
       <div class="card-ability-box"><div class="card-ability">${card.ab}</div></div>`;
   }
 
-  // Play/Burn popup when previewed in hand
+  // Play / Burn popup when previewed in hand
   if (card.id === G.previewCard && zone === 'hand') {
     d.classList.add('previewed');
     d.style.zIndex = '';
@@ -279,6 +281,7 @@ function rZone(id, cards, zone) {
   const el = document.getElementById(id);
 
   if (zone === 'field') {
+    // Animate dying cards before removing
     const dying = [];
     el.querySelectorAll('.card-small').forEach(cardEl => {
       if (!cards.find(c => String(c.id) === cardEl.dataset.id)) dying.push(cardEl);
@@ -301,6 +304,7 @@ function rZone(id, cards, zone) {
     return;
   }
 
+  // Hand: full rebuild
   el.innerHTML = '';
   cards.forEach(c => el.appendChild(mkEl(c, zone)));
 }
@@ -415,150 +419,152 @@ function reorderZones() {
   if (jeetBB) jeetBB.style.display = G.turn === 'jeet' ? 'flex' : 'none';
 }
 
-// ── Hand: overlap (desktop) / carousel (mobile) ───────────────
+// ── Hand layout ───────────────────────────────────────────────
 function adjustHandOverlap() {
   const isMobile = window.innerWidth <= 600;
   ['teaHand', 'jeetHand'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
 
-    if (isMobile) { _applyCarousel(el); return; }
-
-    // Desktop: negative-margin fan
-    const wrap = el.closest('.player-hand-wrap');
-    let containerW = wrap ? wrap.getBoundingClientRect().width : el.getBoundingClientRect().width;
-    containerW = Math.floor(containerW) - 12;
-    if (containerW <= 20) containerW = window.innerWidth - 90 - 24;
-    if (containerW <= 20) return;
-
-    const cards = el.querySelectorAll('.card');
-    if (cards.length > 0) {
-      const cardW = cards[0].getBoundingClientRect().width || parseFloat(getComputedStyle(cards[0]).width) || 118;
-      const total = cards.length;
-      let margin  = 0;
-      if (total > 1) {
-        const totalW = cardW * total + (total - 1) * 8;
-        if (totalW > containerW) {
-          margin = -Math.ceil((totalW - containerW) / (total - 1));
-          margin = Math.max(margin, -(cardW - Math.floor(cardW * 0.12)));
-        }
-      }
-      cards.forEach((card, i) => {
-        card.style.marginRight = i === total - 1 ? '0px' : margin + 'px';
-        card.style.zIndex      = (!G.previewCard || card.dataset.id !== G.previewCard) ? String(i + 1) : '';
-        card.style.flexShrink  = '0';
-        card.style.transform   = '';
-        card.style.position    = '';
-        card.style.opacity     = '';
-      });
-    }
-
-    const minis = el.querySelectorAll('.card-mini');
-    if (minis.length > 0) {
-      const cardW = minis[0].getBoundingClientRect().width || parseFloat(getComputedStyle(minis[0]).width) || 36;
-      const total = minis.length;
-      let margin  = -8;
-      if (total > 1) {
-        const needed = cardW * total;
-        if (needed > containerW) {
-          margin = -Math.floor((needed - containerW) / (total - 1)) - 1;
-          margin = Math.max(margin, -(cardW - Math.floor(cardW * 0.12)));
-        }
-      }
-      minis.forEach((card, i) => {
-        card.style.marginRight = i === total - 1 ? '0px' : margin + 'px';
-        card.style.zIndex      = String(i + 1);
-      });
+    if (isMobile) {
+      _initCarousel(el);
+    } else {
+      _applyOverlap(el);
     }
   });
 }
 
-// ── Carousel (mobile) ────────────────────────────────────────
-// Cards fan in an arc; swipe or arrow buttons to navigate.
-// Centre card is the previewed/active one.
+// ── Desktop: negative-margin overlap (original behaviour) ─────
+function _applyOverlap(el) {
+  // Remove any carousel state
+  el.classList.remove('carousel-mode');
+  _removeCarouselArrows(el);
 
-const _carousel = { tea: { idx: 0 }, jeet: { idx: 0 } };
+  const wrap = el.closest('.player-hand-wrap');
+  let containerW = wrap ? wrap.getBoundingClientRect().width : el.getBoundingClientRect().width;
+  containerW = Math.floor(containerW) - 12;
+  if (containerW <= 20) containerW = window.innerWidth - 90 - 24;
+  if (containerW <= 20) return;
 
-function _applyCarousel(el) {
-  const cards = [...el.querySelectorAll('.card')];
-  if (cards.length === 0) return;
-  const faction = el.id === 'teaHand' ? 'tea' : 'jeet';
-  const state   = _carousel[faction];
-  state.idx     = Math.max(0, Math.min(state.idx, cards.length - 1));
-  const active  = state.idx;
-  const spread  = Math.min(26, 160 / Math.max(cards.length, 1));
-
-  el.style.position = 'relative';
-  el.style.height   = 'var(--card-h)';
-  el.style.overflow = 'visible';
-
-  cards.forEach((card, i) => {
-    const delta   = i - active;
-    const deg     = delta * spread;
-    const lift    = i === active ? -14 : 0;
-    const scale   = i === active ? 1.06 : 0.80;
-    const zIdx    = i === active ? 200 : 10 - Math.abs(delta);
-    const opacity = Math.abs(delta) > 3 ? 0.25 : 1 - Math.abs(delta) * 0.18;
-    card.style.position      = 'absolute';
-    card.style.left          = '50%';
-    card.style.bottom        = '0px';
-    card.style.marginLeft    = 'calc(var(--card-w) * -0.5)';
-    card.style.transformOrigin = '50% 120%';
-    card.style.transform     = `rotate(${deg}deg) translateY(${lift}px) scale(${scale})`;
-    card.style.zIndex        = String(zIdx);
-    card.style.opacity       = String(opacity);
-    card.style.transition    = 'transform 0.18s ease, opacity 0.18s ease';
-    card.style.flexShrink    = '0';
-  });
-
-  if (!el._carouselReady) {
-    _attachCarouselSwipe(el, faction);
-    el._carouselReady = true;
+  const cards = el.querySelectorAll('.card');
+  if (cards.length > 0) {
+    const cardW = cards[0].getBoundingClientRect().width || parseFloat(getComputedStyle(cards[0]).width) || 118;
+    const total = cards.length;
+    let margin  = 0;
+    if (total > 1) {
+      const totalW = cardW * total + (total - 1) * 8;
+      if (totalW > containerW) {
+        margin = -Math.ceil((totalW - containerW) / (total - 1));
+        margin = Math.max(margin, -(cardW - Math.floor(cardW * 0.12)));
+      }
+    }
+    cards.forEach((card, i) => {
+      card.style.marginRight   = i === total - 1 ? '0px' : margin + 'px';
+      card.style.zIndex        = (!G.previewCard || card.dataset.id !== G.previewCard) ? String(i + 1) : '';
+      card.style.flexShrink    = '0';
+      card.style.transform     = '';
+      card.style.position      = '';
+      card.style.opacity       = '';
+      card.style.left          = '';
+      card.style.bottom        = '';
+      card.style.marginLeft    = '';
+      card.style.transformOrigin = '';
+      card.style.transition    = '';
+    });
   }
-  _updateCarouselArrows(el, faction, cards.length);
+
+  // Mini backs (opponent)
+  const minis = el.querySelectorAll('.card-mini');
+  if (minis.length > 0) {
+    const cardW = minis[0].getBoundingClientRect().width || parseFloat(getComputedStyle(minis[0]).width) || 36;
+    const total = minis.length;
+    let margin  = -8;
+    if (total > 1) {
+      const needed = cardW * total;
+      if (needed > containerW) {
+        margin = -Math.floor((needed - containerW) / (total - 1)) - 1;
+        margin = Math.max(margin, -(cardW - Math.floor(cardW * 0.12)));
+      }
+    }
+    minis.forEach((card, i) => {
+      card.style.marginRight = i === total - 1 ? '0px' : margin + 'px';
+      card.style.zIndex      = String(i + 1);
+    });
+  }
 }
 
-function _attachCarouselSwipe(el, faction) {
-  let startX = null;
-  el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
-  el.addEventListener('touchend', e => {
-    if (startX === null) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dx) > 30) _carouselStep(faction, dx < 0 ? 1 : -1);
-    startX = null;
-  }, { passive: true });
+// ── Mobile: horizontal carousel with scroll-snap ──────────────
+function _initCarousel(el) {
+  el.classList.add('carousel-mode');
+  // Reset any inline styles left by desktop mode
+  el.querySelectorAll('.card').forEach(card => {
+    card.style.position      = '';
+    card.style.left          = '';
+    card.style.bottom        = '';
+    card.style.marginLeft    = '';
+    card.style.transformOrigin = '';
+    card.style.opacity       = '1';
+    card.style.flexShrink    = '0';
+    card.style.marginRight   = '0';
+  });
+
+  // Attach swipe-to-scroll is native with overflow-x:auto + scroll-snap.
+  // Arrow buttons remain for tap navigation.
+  _ensureCarouselArrows(el);
+  _updateCarouselArrows(el);
 }
 
-function _carouselStep(faction, dir) {
-  const el    = document.getElementById(faction === 'tea' ? 'teaHand' : 'jeetHand');
-  if (!el) return;
-  const total = el.querySelectorAll('.card').length;
-  _carousel[faction].idx = Math.max(0, Math.min(_carousel[faction].idx + dir, total - 1));
-  _applyCarousel(el);
+function _ensureCarouselArrows(el) {
+  const wrap = el.closest('.player-hand-wrap');
+  if (!wrap || wrap.querySelector('.carousel-arrow-l')) return;
+  const faction = el.id === 'teaHand' ? 'tea' : 'jeet';
+
+  const arrowL = document.createElement('button');
+  arrowL.className   = 'carousel-arrow carousel-arrow-l';
+  arrowL.textContent = '‹';
+  arrowL.onclick     = e => { e.stopPropagation(); _carouselScrollBy(el, -1); };
+  wrap.appendChild(arrowL);
+
+  const arrowR = document.createElement('button');
+  arrowR.className   = 'carousel-arrow carousel-arrow-r';
+  arrowR.textContent = '›';
+  arrowR.onclick     = e => { e.stopPropagation(); _carouselScrollBy(el, 1); };
+  wrap.appendChild(arrowR);
+
+  // Update arrows on scroll end
+  el.addEventListener('scrollend', () => _updateCarouselArrows(el), { passive: true });
+  // fallback for browsers without scrollend
+  el.addEventListener('scroll', _debounce(() => _updateCarouselArrows(el), 120), { passive: true });
 }
 
-function _updateCarouselArrows(el, faction, total) {
+function _removeCarouselArrows(el) {
   const wrap = el.closest('.player-hand-wrap');
   if (!wrap) return;
-  let arrowL = wrap.querySelector('.carousel-arrow-l');
-  let arrowR = wrap.querySelector('.carousel-arrow-r');
-  if (!arrowL) {
-    arrowL = document.createElement('button');
-    arrowL.className = 'carousel-arrow carousel-arrow-l';
-    arrowL.textContent = '‹';
-    arrowL.onclick = e => { e.stopPropagation(); _carouselStep(faction, -1); };
-    wrap.appendChild(arrowL);
-  }
-  if (!arrowR) {
-    arrowR = document.createElement('button');
-    arrowR.className = 'carousel-arrow carousel-arrow-r';
-    arrowR.textContent = '›';
-    arrowR.onclick = e => { e.stopPropagation(); _carouselStep(faction, 1); };
-    wrap.appendChild(arrowR);
-  }
-  const idx = _carousel[faction].idx;
-  arrowL.style.opacity       = idx === 0         ? '0.2' : '1';
-  arrowL.style.pointerEvents = idx === 0         ? 'none' : 'auto';
-  arrowR.style.opacity       = idx === total - 1 ? '0.2' : '1';
-  arrowR.style.pointerEvents = idx === total - 1 ? 'none' : 'auto';
+  wrap.querySelectorAll('.carousel-arrow').forEach(a => a.remove());
+}
+
+function _carouselScrollBy(el, dir) {
+  const cards = el.querySelectorAll('.card');
+  if (cards.length === 0) return;
+  const cardW = cards[0].getBoundingClientRect().width || 118;
+  el.scrollBy({ left: dir * (cardW + 8), behavior: 'smooth' });
+}
+
+function _updateCarouselArrows(el) {
+  const wrap = el.closest('.player-hand-wrap');
+  if (!wrap) return;
+  const arrowL = wrap.querySelector('.carousel-arrow-l');
+  const arrowR = wrap.querySelector('.carousel-arrow-r');
+  if (!arrowL || !arrowR) return;
+  const atStart = el.scrollLeft <= 4;
+  const atEnd   = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+  arrowL.style.opacity       = atStart ? '0.2' : '1';
+  arrowL.style.pointerEvents = atStart ? 'none' : 'auto';
+  arrowR.style.opacity       = atEnd   ? '0.2' : '1';
+  arrowR.style.pointerEvents = atEnd   ? 'none' : 'auto';
+}
+
+function _debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
